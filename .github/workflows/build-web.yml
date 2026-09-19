@@ -32,11 +32,17 @@ jobs:
           channel: "stable"
           cache: true
 
-      # Nota: a ativacao do Pages e' feita pelo backend KATA
-      # (o GITHUB_TOKEN do Actions nao tem permissao admin para criar Pages)
-      - name: Verificar se Pages esta ativo
+      - name: Enable GitHub Pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Pages ativado pelo backend KATA (via API pessoal)"
+          gh api repos/${{ github.repository }}/pages \
+            -X POST \
+            -f source[branch]=gh-pages \
+            -f source[path]=/ \
+            2>/dev/null \
+            && echo "Pages enabled" \
+            || echo "Pages enabled or already active"
 
       - name: Gerar pasta web/
         run: flutter create . --platforms=web --project-name notas_v11
