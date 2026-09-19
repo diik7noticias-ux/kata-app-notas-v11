@@ -1,32 +1,34 @@
 {
-  "screens": {
-    "home_screen": {
-      "header": {
-        "search_bar": {
+  "screen": "home_screen",
+  "kind": "list",
+  "topBar": {
+    "appBar": {
+      "title": "Notas V11",
+      "actions": [
+        {
+          "icon": "refresh",
+          "action": "refresh"
+        }
+      ],
+      "bottom": {
+        "searchBar": {
           "enabled": true,
-          "placeholder": "Pesquisar notas...",
+          "placeholder": "Pesquisar tarefas...",
           "debounce": 300
         }
-      },
-      "performance": {
-        "lazy_loading": true,
-        "caching": {
-          "enabled": true,
-          "strategy": "memory"
-        }
-      }
-    },
-    "dependencies": {
-      "flutter_bloc": "^8.1.3",
-      "cached_network_image": "^3.3.0",
-      "search_choices": "^2.5.0"
-    },
-    "workflows": {
-      "build": {
-        "minify": true,
-        "optimize": true,
-        "strip": true
       }
     }
+  },
+  "body": {
+    "type": "empty",
+    "message": "App gerada pelo KATA."
+  },
+  "fab": {
+    "icon": "+",
+    "visible": false
+  },
+  "colors": {
+    "primary": "#1BB9BE",
+    "background": "#F8FAFC"
   }
 }
