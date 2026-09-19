@@ -56,8 +56,7 @@ class _TransactionListState extends State<TransactionList> {
       _searchQuery = _searchController.text.toLowerCase();
       _filteredTransactions = widget.transactions.where((transaction) {
         return transaction.title.toLowerCase().contains(_searchQuery) ||
-            transaction.description.toLowerCase().contains(_searchQuery) ||
-            transaction.category.toLowerCase().contains(_searchQuery);
+               transaction.description.toLowerCase().contains(_searchQuery);
       }).toList();
     });
   }
@@ -70,7 +69,6 @@ class _TransactionListState extends State<TransactionList> {
     final nameController = TextEditingController(text: transaction.title);
     final descriptionController = TextEditingController(text: transaction.description);
     final amountController = TextEditingController(text: transaction.amount.toString());
-    final categoryController = TextEditingController(text: transaction.category);
 
     showDialog<void>(
       context: context,
@@ -106,14 +104,6 @@ class _TransactionListState extends State<TransactionList> {
                   ),
                   keyboardType: TextInputType.number,
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: categoryController,
-                  decoration: const InputDecoration(
-                    labelText: 'Categoria',
-                    hintText: 'Digite a categoria',
-                  ),
-                ),
               ],
             ),
           ),
@@ -132,9 +122,8 @@ class _TransactionListState extends State<TransactionList> {
                   title: nameController.text.trim(),
                   description: descriptionController.text.trim(),
                   amount: double.tryParse(amountController.text) ?? 0.0,
-                  category: categoryController.text.trim(),
+                  isIncome: transaction.isIncome,
                   date: transaction.date,
-                  type: transaction.type,
                 );
                 widget.onTransactionUpdated(updatedTransaction);
                 Navigator.of(context).pop();
@@ -168,7 +157,7 @@ class _TransactionListState extends State<TransactionList> {
             itemCount: _filteredTransactions.length,
             itemBuilder: (context, index) {
               final transaction = _filteredTransactions[index];
-              final isIncome = transaction.type == 'income';
+              final isIncome = transaction.isIncome;
               final color = isIncome ? Colors.green : Colors.red;
 
               return Card(
@@ -185,7 +174,7 @@ class _TransactionListState extends State<TransactionList> {
                     transaction.title,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isIncome ? Colors.green : Colors.red,
+                      color: color,
                     ),
                   ),
                   subtitle: Column(
@@ -199,31 +188,19 @@ class _TransactionListState extends State<TransactionList> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Text(
-                            transaction.category,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            transaction.date.toString().split(' ')[0],
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Data: ${transaction.formattedDate}',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                        ),
                       ),
                     ],
                   ),
                   trailing: Text(
-                    '${transaction.amount.toStringAsFixed(2)} €',
+                    'R\)${transaction.amount.toStringAsFixed(2)}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isIncome ? Colors.green : Colors.red,
+                      color: color,
                     ),
                   ),
                   onTap: () => _showTransactionDetails(transaction),
@@ -243,9 +220,8 @@ class _TransactionListState extends State<TransactionList> {
                   title: '',
                   description: '',
                   amount: 0.0,
-                  category: '',
+                  isIncome: true,
                   date: DateTime.now(),
-                  type: 'expense',
                 );
                 widget.onTransactionSelected(newTransaction);
               },
