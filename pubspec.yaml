@@ -1,5 +1,5 @@
 name: notas_v11
-description: Notas V11
+description: Notas V11 - Aplicação de gestão de notas com funcionalidade de pesquisa
 publish_to: "none"
 version: 0.1.0+1
 
@@ -13,6 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  search_choices: ^3.0.0  # Adicionado para funcionalidade de pesquisa
 
 dev_dependencies:
   build_runner: ^2.4.6
