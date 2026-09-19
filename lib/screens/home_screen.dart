@@ -31,11 +31,19 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Box<Task> taskBox;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _initHive();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _initHive() async {
@@ -67,6 +75,14 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
+  List<Task> _filterTasks(List<Task> tasks) {
+    if (_searchQuery.isEmpty) {
+      return tasks;
+    }
+    return tasks.where((task) =>
+        task.title.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,35 +94,63 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => setState(() {}),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(56),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Pesquisar tarefas...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+            ),
+          ),
+        ),
       ),
       body: ValueListenableBuilder<Box<Task>>(
         valueListenable: taskBox.listenable(),
         builder: (context, box, _) {
           final tasks = box.values.toList();
-          return ListView.builder(
-            itemCount: tasks.length,
-            itemBuilder: (context, index) {
-              final task = tasks[index];
-              return ListTile(
-                title: Text(
-                  task.title,
-                  style: TextStyle(
-                    decoration: task.isCompleted
-                        ? TextDecoration.lineThrough
-                        : TextDecoration.none,
-                  ),
-                ),
-                leading: Checkbox(
-                  value: task.isCompleted,
-                  onChanged: (value) => _toggleTaskStatus(task.id),
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => _deleteTask(task.id),
-                ),
-              );
-            },
-          );
+          final filteredTasks = _filterTasks(tasks);
+          return filteredTasks.isEmpty
+              ? const Center(
+                  child: Text('Nenhuma tarefa encontrada'),
+                )
+              : ListView.builder(
+                  itemCount: filteredTasks.length,
+                  itemBuilder: (context, index) {
+                    final task = filteredTasks[index];
+                    return ListTile(
+                      title: Text(
+                        task.title,
+                        style: TextStyle(
+                          decoration: task.isCompleted
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+                        ),
+                      ),
+                      leading: Checkbox(
+                        value: task.isCompleted,
+                        onChanged: (value) => _toggleTaskStatus(task.id),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () => _deleteTask(task.id),
+                      ),
+                    );
+                  },
+                );
         },
       ),
       floatingActionButton: FloatingActionButton(
