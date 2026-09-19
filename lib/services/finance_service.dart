@@ -3,66 +3,53 @@ import 'package:intl/intl.dart';
 import '../models/finance_model.dart';
 
 class FinanceService {
-  static const String _entriesBoxName = 'finance_entries';
-  static const String _expensesBoxName = 'finance_expenses';
-
-  late Box<FinanceEntry> _entriesBox;
-  late Box<FinanceExpense> _expensesBox;
+  static const String _financeRecordsBoxName = 'finance_records';
+  late Box<FinanceRecord> _financeRecordsBox;
 
   Future<void> init() async {
     await Hive.initFlutter();
-    Hive.registerAdapter(FinanceEntryAdapter());
-    Hive.registerAdapter(FinanceExpenseAdapter());
-
-    _entriesBox = await Hive.openBox<FinanceEntry>(_entriesBoxName);
-    _expensesBox = await Hive.openBox<FinanceExpense>(_expensesBoxName);
+    Hive.registerAdapter(FinanceRecordAdapter());
+    _financeRecordsBox = await Hive.openBox<FinanceRecord>(_financeRecordsBoxName);
   }
 
-  Future<void> addEntry(FinanceEntry entry) async {
-    await _entriesBox.add(entry);
+  Future<void> addRecord(FinanceRecord record) async {
+    await _financeRecordsBox.add(record);
   }
 
-  Future<void> addExpense(FinanceExpense expense) async {
-    await _expensesBox.add(expense);
+  List<FinanceRecord> getAllRecords() {
+    return _financeRecordsBox.values.toList();
   }
 
-  List<FinanceEntry> getAllEntries() {
-    return _entriesBox.values.toList();
-  }
-
-  List<FinanceExpense> getAllExpenses() {
-    return _expensesBox.values.toList();
-  }
-
-  List<FinanceEntry> getEntriesByDate(String date) {
-    return _entriesBox.values
-        .where((entry) => entry.date == date)
+  List<FinanceRecord> getRecordsByDate(DateTime date) {
+    return _financeRecordsBox.values
+        .where((record) => record.date.year == date.year && record.date.month == date.month && record.date.day == date.day)
         .toList();
   }
 
-  List<FinanceExpense> getExpensesByDate(String date) {
-    return _expensesBox.values
-        .where((expense) => expense.date == date)
-        .toList();
+  double getTotalIncome() {
+    return _financeRecordsBox.values
+        .where((record) => record.isIncome)
+        .fold(0.0, (sum, record) => sum + record.amount);
   }
 
-  double getTotalEntries() {
-    return _entriesBox.values.fold(0.0, (sum, entry) => sum + entry.amount);
-  }
-
-  double getTotalExpenses() {
-    return _expensesBox.values.fold(0.0, (sum, expense) => sum + expense.amount);
+  double getTotalExpense() {
+    return _financeRecordsBox.values
+        .where((record) => !record.isIncome)
+        .fold(0.0, (sum, record) => sum + record.amount);
   }
 
   double getNetBalance() {
-    return getTotalEntries() - getTotalExpenses();
+    return getTotalIncome() - getTotalExpense();
   }
 
   String formatCurrency(double amount) {
-    return '\$${amount.toStringAsFixed(2)}';
+    return 'R\)${amount.toStringAsFixed(2).replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=\d{3}+(?!\d))'),
+          (Match m) => '${m.group(1)},',
+        )}';
   }
 
   String formatDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
+    return DateFormat('dd/MM/yyyy').format(date);
   }
 }
