@@ -23,12 +23,40 @@
     }
   },
   "body": {
-    "type": "empty",
-    "message": "App gerada pelo KATA."
+    "type": "list",
+    "items": [
+      {
+        "type": "summary",
+        "title": "Resumo de Transações",
+        "fields": [
+          {
+            "label": "Entradas",
+            "value": "R$XX.XX",
+            "color": "#8BC34A"
+          },
+          {
+            "label": "Saídas",
+            "value": "R$XX.XX",
+            "color": "#EF5350"
+          },
+          {
+            "label": "Saldo",
+            "value": "R$XX.XX",
+            "color": "#8BC34A"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "title": "Transações",
+        "hasDelete": true,
+        "searchable": true
+      }
+    ]
   },
   "fab": {
     "icon": "+",
-    "visible": false
+    "visible": true
   },
   "colors": {
     "primary": "#1BB9BE",
