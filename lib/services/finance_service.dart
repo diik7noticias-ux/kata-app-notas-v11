@@ -1,6 +1,5 @@
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import '../models/finance_model.dart';
 
 class FinanceService {
   static const String _financeRecordsBoxName = 'finance_records';
