@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:notas_v11/models/transaction_model.dart';
+import 'package:intl/intl.dart';
 
 class TransactionList extends StatefulWidget {
   const TransactionList({
@@ -70,69 +69,65 @@ class _TransactionListState extends State<TransactionList> {
     final descriptionController = TextEditingController(text: transaction.description);
     final amountController = TextEditingController(text: transaction.amount.toString());
 
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Editar Transação'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nome',
-                    hintText: 'Digite o nome da transação',
-                  ),
+    showDialog<void>(context: context, builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Editar Transação'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Nome',
+                  hintText: 'Digite o nome da transação',
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: descriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Descrição',
-                    hintText: 'Digite a descrição',
-                  ),
-                  maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Descrição',
+                  hintText: 'Digite a descrição',
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: amountController,
-                  decoration: const InputDecoration(
-                    labelText: 'Quantia',
-                    hintText: 'Digite o valor',
-                  ),
-                  keyboardType: TextInputType.number,
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: amountController,
+                decoration: const InputDecoration(
+                  labelText: 'Quantia',
+                  hintText: 'Digite o valor',
                 ),
-              ],
-            ),
+                keyboardType: TextInputType.number,
+              ),
+            ],
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Salvar'),
-              onPressed: () {
-                final updatedTransaction = Transaction(
-                  id: transaction.id,
-                  title: nameController.text.trim(),
-                  description: descriptionController.text.trim(),
-                  amount: double.tryParse(amountController.text) ?? 0.0,
-                  isIncome: transaction.isIncome,
-                  date: transaction.date,
-                );
-                widget.onTransactionUpdated(updatedTransaction);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+        ),
+        actions: <Widget>[TextButton(
+          child: const Text('Cancelar'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          child: const Text('Salvar'),
+          onPressed: () {
+            final updatedTransaction = Transaction(
+              id: transaction.id,
+              title: nameController.text.trim(),
+              description: descriptionController.text.trim(),
+              amount: double.tryParse(amountController.text) ?? 0.0,
+              isIncome: transaction.isIncome,
+              date: transaction.date,
+            );
+            widget.onTransactionUpdated(updatedTransaction);
+            Navigator.of(context).pop();
+          },
+        ),
+        ],
+      );
+    });
   }
 
   @override
@@ -189,7 +184,7 @@ class _TransactionListState extends State<TransactionList> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Data: ${transaction.formattedDate}',
+                        'Data: ${DateFormat('dd/MM/yyyy').format(transaction.date)}',
                         style: TextStyle(
                           color: Colors.grey[600],
                         ),
