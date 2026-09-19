@@ -1,41 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:search_choices/search_choices.dart';
-
-part 'home_screen.g.dart';
-
-@HiveType(typeId: 0)
-class Transaction {
-  @HiveField(0)
-  final String id;
-
-  @HiveField(1)
-  String title;
-
-  @HiveField(2)
-  String description;
-
-  @HiveField(3)
-  double amount;
-
-  @HiveField(4)
-  bool isIncome;
-
-  @HiveField(5)
-  DateTime date;
-
-  Transaction({
-    required this.id,
-    required this.title,
-    this.description = '',
-    this.amount = 0.0,
-    this.isIncome = false,
-    DateTime? date,
-  }) : date = date ?? DateTime.now();
-
-  String get formattedDate => '${date.day}/${date.month}/${date.year}';
-}
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -74,14 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
-  Future<void> _toggleTransactionStatus(String id) async {
-    final transaction = transactionBox.get(id);
-    if (transaction != null) {
-      transaction.isIncome = !transaction.isIncome;
-      await transactionBox.put(id, transaction);
-    }
-  }
-
   Future<void> _deleteTransaction(String id) async {
     await transactionBox.delete(id);
     setState(() {});
@@ -94,9 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return transactions.where((transaction) =>
         transaction.title.toLowerCase().contains(_searchQuery.toLowerCase()) &&
-        (_selectedDate == null || transaction.date.year == _selectedDate!.year &&
+        (_selectedDate == null || 
+            transaction.date.year == _selectedDate!.year &&
             transaction.date.month == _selectedDate!.month &&
-            transaction.date.day == _selectedDate!.day)
+            transaction.date.day == _selectedDate!.day))
     ).toList();
   }
 
@@ -104,122 +63,108 @@ class _HomeScreenState extends State<HomeScreen> {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
     final amountController = TextEditingController();
-    final isIncome = true;
+    bool isIncome = true;
 
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Nova Transação'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+    await showDialog<void>(context: context, builder: (BuildContext context) {
+      return StatefulBuilder(builder: (context, setState) {
+        return AlertDialog(
+          title: const Text('Nova Transação'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Destino/Produto',
+                    hintText: 'Digite o nome do destino ou produto',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Descrição',
+                    hintText: 'Digite a descrição',
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: amountController,
+                  decoration: const InputDecoration(
+                    labelText: 'Quantia',
+                    hintText: 'Digite o valor',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 16),
+                Row(
                   children: [
-                    TextField(
-                      controller: titleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Destino/Produto',
-                        hintText: 'Digite o nome do destino ou produto',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: descriptionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Descrição',
-                        hintText: 'Digite a descrição',
-                      ),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: amountController,
-                      decoration: const InputDecoration(
-                        labelText: 'Quantia',
-                        hintText: 'Digite o valor',
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        const Text('Entrada/Saída: '),
-                        Radio<bool>(
-                          value: true,
-                          groupValue: isIncome,
-                          onChanged: (value) {
-                            setState(() {
-                              isIncome = value!;
-                            });
-                          },
-                        ),
-                        const Text('Entrada'),
-                        Radio<bool>(
-                          value: false,
-                          groupValue: isIncome,
-                          onChanged: (value) {
-                            setState(() {
-                              isIncome = value!;
-                            });
-                          },
-                        ),
-                        const Text('Saída'),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        );
-                        if (date != null) {
-                          setState(() {
-                            _selectedDate = date;
-                          });
-                        }
-                      },
-                      child: const Text('Selecionar Data'),
-                    ),
-                    if (_selectedDate != null)
-                      Text('Data selecionada: ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'),
+                    const Text('Entrada/Saída: '),
+                    Radio<bool>(value: true, groupValue: isIncome, onChanged: (value) {
+                      setState(() {
+                        isIncome = value!;
+                      });
+                    }),
+                    const Text('Entrada'),
+                    Radio<bool>(value: false, groupValue: isIncome, onChanged: (value) {
+                      setState(() {
+                        isIncome = value!;
+                      });
+                    }),
+                    const Text('Saída'),
                   ],
                 ),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('Cancelar'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  child: const Text('Adicionar'),
-                  onPressed: () {
-                    if (titleController.text.isNotEmpty && amountController.text.isNotEmpty) {
-                      final newTransaction = Transaction(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
-                        title: titleController.text,
-                        description: descriptionController.text,
-                        amount: double.tryParse(amountController.text) ?? 0.0,
-                        isIncome: isIncome,
-                        date: _selectedDate ?? DateTime.now(),
-                      );
-                      _addTransaction(newTransaction);
-                      Navigator.of(context).pop();
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (date != null) {
+                      setState(() {
+                        _selectedDate = date;
+                      });
                     }
                   },
+                  child: const Text('Selecionar Data'),
                 ),
+                if (_selectedDate != null)
+                  Text('Data selecionada: ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'),
               ],
-            );
-          },
+            ),
+          ),
+          actions: <Widget>[TextButton(
+            child: const Text('Cancelar'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('Adicionar'),
+            onPressed: () {
+              if (titleController.text.isNotEmpty && amountController.text.isNotEmpty) {
+                final newTransaction = Transaction(
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  title: titleController.text,
+                  description: descriptionController.text,
+                  amount: double.tryParse(amountController.text) ?? 0.0,
+                  isIncome: isIncome,
+                  date: _selectedDate ?? DateTime.now(),
+                );
+                _addTransaction(newTransaction);
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+          ],
         );
-      },
-    );
+      });
+    });
   }
 
   Widget _buildTransactionSummary() {
@@ -244,9 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                _showAddTransactionDialog();
-              },
+              onPressed: _showAddTransactionDialog,
               child: const Text('Adicionar Transação'),
             ),
           ],
@@ -260,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Text(label, style: const TextStyle(fontSize: 12)),
         const SizedBox(height: 4),
-        Text('R\$${value.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, color: color)),
+        Text('R\)${value.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, color: color)),
       ],
     );
   }
@@ -323,9 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 final transactions = box.values.toList();
                 final filteredTransactions = _filterTransactions(transactions);
                 return filteredTransactions.isEmpty
-                    ? const Center(
-                        child: Text('Nenhuma transação encontrada'),
-                      )
+                    ? const Center(child: Text('Nenhuma transação encontrada'))
                     : ListView.builder(
                         itemCount: filteredTransactions.length,
                         itemBuilder: (context, index) {
@@ -354,14 +295,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4.0),
                                     child: Text(
-                                      'Data: ${transaction.formattedDate}',
+                                      'Data: ${DateFormat('dd/MM/yyyy').format(transaction.date)}',
                                       style: const TextStyle(fontSize: 14),
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4.0),
                                     child: Text(
-                                      'R\$${transaction.amount.toStringAsFixed(2)}',
+                                      'R\)${transaction.amount.toStringAsFixed(2)}',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: color,
