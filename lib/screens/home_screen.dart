@@ -49,12 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_searchQuery.isEmpty && _selectedDate == null) {
       return transactions;
     }
-
-    return transactions.where((transaction) =>
-        transaction.title.toLowerCase().contains(_searchQuery.toLowerCase()) &&
+    return transactions.where((transaction) => 
+        transaction.title.toLowerCase().contains(_searchQuery.toLowerCase()) && 
         (_selectedDate == null || 
-            transaction.date.year == _selectedDate!.year &&
-            transaction.date.month == _selectedDate!.month &&
+            transaction.date.year == _selectedDate!.year && 
+            transaction.date.month == _selectedDate!.month && 
             transaction.date.day == _selectedDate!.day))
     ).toList();
   }
@@ -134,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: const Text('Selecionar Data'),
                 ),
                 if (_selectedDate != null)
-                  Text('Data selecionada: ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'),
+                  Text('Data selecionada: ${DateFormat('dd/MM/yyyy').format(_selectedDate!)}'),
               ],
             ),
           ),
@@ -225,12 +224,18 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                SearchChoices<String>.single(
-                  items: [],
-                  hint: 'Pesquisar transações...',
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Pesquisar transações...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
                   onChanged: (value) {
                     setState(() {
-                      _searchQuery = value ?? '';
+                      _searchQuery = value;
                     });
                   },
                 ),
