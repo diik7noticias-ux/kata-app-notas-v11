@@ -1,34 +1,84 @@
 {
-  "screen": "home_screen",
-  "kind": "list",
-  "topBar": {
-    "appBar": {
-      "title": "Notas V11",
-      "actions": [
+  "screens": [
+    {
+      "name": "home_screen",
+      "tabs": [
         {
-          "icon": "refresh",
-          "action": "refresh"
+          "label": "Notas",
+          "route": "/home"
+        },
+        {
+          "label": "Financeiro",
+          "route": "/finance",
+          "icon": "attach_money"
         }
-      ],
-      "bottom": {
-        "searchBar": {
-          "enabled": true,
-          "placeholder": "Pesquisar tarefas...",
-          "debounce": 300
-        }
+      ]
+    },
+    {
+      "name": "finance_screen",
+      "layout": {
+        "header": "Gestão Financeira",
+        "sections": [
+          {
+            "type": "form",
+            "widget": "transaction_form",
+            "fields": [
+              "quantia",
+              "destino",
+              "data"
+            ]
+          },
+          {
+            "type": "list",
+            "widget": "transaction_list",
+            "sort": "data_desc"
+          }
+        ]
       }
     }
+  ],
+  "widgets": {
+    "transaction_form": {
+      "fields": {
+        "quantia": {
+          "type": "number",
+          "label": "Valor",
+          "required": true
+        },
+        "destino": {
+          "type": "text",
+          "label": "Destino",
+          "required": true
+        },
+        "data": {
+          "type": "date",
+          "label": "Data",
+          "default": "today"
+        }
+      },
+      "actions": [
+        "salvar",
+        "cancelar"
+      ]
+    },
+    "transaction_list": {
+      "columns": [
+        "data",
+        "destino",
+        "valor",
+        "tipo"
+      ],
+      "filters": [
+        "entrada",
+        "saida"
+      ]
+    }
   },
-  "body": {
-    "type": "empty",
-    "message": "App gerada pelo KATA."
-  },
-  "fab": {
-    "icon": "+",
-    "visible": false
-  },
-  "colors": {
-    "primary": "#1BB9BE",
-    "background": "#F8FAFC"
+  "theme": {
+    "finance": {
+      "primaryColor": "#4CAF50",
+      "secondaryColor": "#8BC34A",
+      "textColor": "#333"
+    }
   }
 }
