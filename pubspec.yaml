@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  search_choices: ^3.0.0  # Adicionado para funcionalidade de pesquisa
+  search_choices: ^2.3.1  # Versão compatível com Flutter 3.44.8
 
 dev_dependencies:
   build_runner: ^2.4.6
